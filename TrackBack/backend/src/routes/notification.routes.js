@@ -1,0 +1,11 @@
+import { Router } from 'express';
+import { param } from 'express-validator';
+import authenticate from '../middleware/auth.middleware.js';
+import { list, read, readAll } from '../controllers/notification.controller.js';
+import { validateRequest } from '../utils/validators.js';
+const router = Router();
+router.use(authenticate);
+router.get('/', list);
+router.patch('/read-all', readAll);
+router.patch('/:id/read', param('id').isMongoId(), validateRequest, read);
+export default router;

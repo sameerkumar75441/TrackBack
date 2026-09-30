@@ -1,0 +1,14 @@
+import { Router } from 'express';
+import { body, param } from 'express-validator';
+import { custody, pickup, qr, receipt, verify } from '../controllers/handover.controller.js';
+import authenticate from '../middleware/auth.middleware.js';
+import requireRole from '../middleware/role.middleware.js';
+import { validateRequest } from '../utils/validators.js';
+const router = Router();
+router.use(authenticate);
+router.patch('/claims/:claimId/pickup', param('claimId').isMongoId().withMessage('Claim reference is invalid.'), body('pickupDate').isISO8601().withMessage('Choose a valid pickup date.'), body('pickupSlot').isIn(['morning', 'afternoon', 'evening']).withMessage('Choose morning, afternoon, or evening as the pickup slot.'), validateRequest, pickup);
+router.post('/claims/:claimId/qr', param('claimId').isMongoId().withMessage('Claim reference is invalid.'), validateRequest, qr);
+router.post('/verify', requireRole('security', 'admin'), body('token').isString().isLength({ min: 20, max: 200 }).withMessage('Enter a valid QR token. Scan the handover QR code or paste its complete one-time token.'), body('collegeIdVerified').isBoolean().custom((v) => v === true).withMessage('Confirm that the claimant’s college ID has been verified before completing handover.'), validateRequest, verify);
+router.get('/claims/:claimId/receipt', param('claimId').isMongoId().withMessage('Claim reference is invalid.'), validateRequest, receipt);
+router.get('/items/:itemId/custody', param('itemId').isMongoId().withMessage('Item reference is invalid.'), validateRequest, custody);
+export default router;

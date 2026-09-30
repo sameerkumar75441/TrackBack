@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { body } from 'express-validator';
+import authenticate from '../middleware/auth.middleware.js';
+import { create, list } from '../controllers/rating.controller.js';
+import { validateRequest } from '../utils/validators.js';
+const router = Router();
+router.use(authenticate);
+router.get('/', list);
+router.post('/', body('claimId').isMongoId(), body('rating').isInt({ min: 1, max: 5 }), body('feedback').optional().trim().isLength({ max: 1000 }), validateRequest, create);
+export default router;

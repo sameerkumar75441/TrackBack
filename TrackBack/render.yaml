@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: trackback-api
+    env: node
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: node src/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: MATCHING_SERVICE_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+  - type: web
+    name: trackback-matching
+    env: python
+    rootDir: matching-service
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    healthCheckPath: /health
